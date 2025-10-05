@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoreMod - Sistema Completo de Diseño Paramétrico</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0B3D91, #2563EB);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        canvas {
+            border: 2px solid #00D4FF;
+            background: rgba(0, 0, 0, 0.3);
+            display: block;
+            margin: 10px auto;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .section {
+            margin: 20px 0;
+        }
+        .section h3 {
+            color: #00D4FF;
+            margin-top: 0;
+            border-bottom: 2px solid #00D4FF;
+            padding-bottom: 5px;
+        }
+        button {
+            background: #00D4FF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0099CC;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .controls label {
+            color: #00D4FF;
+            font-weight: bold;
+            min-width: 80px;
+        }
+        .controls input[type="range"] {
+            width: 100px;
+        }
+        .controls span {
+            color: #00D4FF;
+            font-weight: bold;
+            min-width: 60px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: rgba(16, 185, 129, 0.3); }
+        .error { background: rgba(239, 68, 68, 0.3); }
+        .info { background: rgba(0, 212, 255, 0.3); }
+        .warning { background: rgba(245, 158, 11, 0.3); }
+        .evaluation {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .evaluation h4 {
+            color: #00D4FF;
+            margin-top: 0;
+        }
+        .score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .score.green { background: rgba(16, 185, 129, 0.2); }
+        .score.amber { background: rgba(245, 158, 11, 0.2); }
+        .score.red { background: rgba(239, 68, 68, 0.2); }
+        .score-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .module-info {
+            background: rgba(245, 158, 11, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .module-info h4 {
+            color: #F59E0B;
+            margin-top: 0;
+        }
+        .habitat-selector {
+            margin: 10px 0;
+        }
+        .habitat-selector select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #00D4FF;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        .crew-input {
+            margin: 10px 0;
+        }
+        .crew-input input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #00D4FF;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CoreMod - Sistema Completo de Diseño Paramétrico</h1>
+            <p>Sistema de evaluación de viabilidad para módulos espaciales</p>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="section">
+                    <h3>🎮 Controles</h3>
+                    <div class="habitat-selector">
+                        <label>Hábitat:</label>
+                        <select id="habitatSelect">
+                            <option value="leo">LEO (Órbita Baja Terrestre)</option>
+                            <option value="luna">Luna</option>
+                            <option value="marte">Marte</option>
+                        </select>
+                    </div>
+                    <div class="crew-input">
+                        <label>Tripulación:</label>
+                        <input type="number" id="crewCount" min="1" max="20" value="4">
+                    </div>
+                    <button onclick="addModule('halo')">HALO</button>
+                    <button onclick="addModule('eclss')">ECLSS</button>
+                    <button onclick="addModule('power')">Power</button>
+                    <button onclick="addModule('lab')">Laboratorio</button>
+                    <button onclick="addModule('docking')">Docking</button>
+                    <button onclick="addModule('exercise')">Ejercicio</button>
+                    <button onclick="addModule('storage')">Almacenamiento</button>
+                    <button onclick="clearAll()">Limpiar Todo</button>
+                </div>
+
+                <div class="section">
+                    <h3>📊 Evaluación de Viabilidad</h3>
+                    <div id="evaluationResults" class="evaluation">
+                        <h4>Puntuación General</h4>
+                        <div id="overallScore" class="score">
+                            <span>Puntuación Total:</span>
+                            <span class="score-value">0%</span>
+                        </div>
+                        <h4>Áreas de Evaluación</h4>
+                        <div id="areaScores"></div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>📋 Información del Módulo</h3>
+                    <div id="moduleInfo" class="module-info">
+                        <h4>Ningún módulo seleccionado</h4>
+                        <p>Selecciona un módulo para ver información detallada</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="canvas-container">
+                <div class="section">
+                    <h3>🎨 Visualización 3D</h3>
+                    <div id="renderStatus" class="status info">Inicializando sistema...</div>
+                    <canvas id="renderCanvas" width="800" height="600"></canvas>
+                    <div class="controls">
+                        <button onclick="toggleWireframe()">Modo Wireframe</button>
+                        <button onclick="toggleLighting()">Iluminación</button>
+                        <button onclick="resetCamera()">Reset Cámara</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let gl = null;
+        let program = null;
+        let modules = [];
+        let selectedModuleIndex = -1;
+        let dragging = false;
+        let cameraDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        let mousePos = { x: 0, y: 0 };
+        let lastMousePos = { x: 0, y: 0 };
+        let wireframeMode = false;
+        let lightingEnabled = true;
+        let currentHabitat = 'leo';
+        let crewCount = 4;
+        
+        // Sistema de cámara
+        let camera = {
+            position: [0, 0, -15],
+            target: [0, 0, 0],
+            up: [0, 1, 0],
+            rotationX: 0,
+            rotationY: 0,
+            zoom: 1.0,
+            rotationSpeed: 1.0,
+            zoomSpeed: 1.0,
+            panSpeed: 1.0
+        };
+
+        // Base de datos de módulos espaciales realistas expandida
+        const moduleDatabase = {
+            halo: {
+                name: 'HALO',
+                description: 'Módulo de hábitat y logística',
+                type: 'habitat',
+                diameter: 3.0,
+                length: 7.0,
+                mass: 10000,
+                powerConsumption: 5.0,
+                waterConsumption: 2.0,
+                airConsumption: 1.5,
+                exerciseSpace: 0.8,
+                privacyLevel: 0.9,
+                socialSpace: 0.7,
+                storageCapacity: 0.6,
+                maintenanceAccess: 0.8,
+                resourceEfficiency: 0.7,
+                energyEfficiency: 0.6,
+                powerGeneration: 0.0,
+                exerciseEquipment: 0.8,
+                // Nuevos parámetros expandidos
+                nutritionQuality: 0.8,
+                exerciseRegularity: 0.7,
+                sleepQuality: 0.9,
+                circadianRhythms: 0.8,
+                privateSpaces: 0.9,
+                socialConnection: 0.7,
+                sensoryStimulation: 0.6,
+                purposeMotivation: 0.8,
+                earthCommunication: 0.9,
+                aestheticEnvironment: 0.7,
+                naturalLighting: 0.8,
+                ambientSound: 0.6,
+                leisureTime: 0.7,
+                environmentFlexibility: 0.8,
+                systemReliability: 0.9,
+                personalAutonomy: 0.8,
+                psychologicalSupport: 0.7,
+                identityBelonging: 0.8,
+                dockingPorts: 2,
+                maxConnections: 4,
+                color: [0.2, 0.6, 1.0]
+            },
+            eclss: {
+                name: 'ECLSS',
+                description: 'Sistema de soporte vital',
+                type: 'life_support',
+                diameter: 2.5,
+                length: 4.0,
+                mass: 8000,
+                powerConsumption: 8.0,
+                waterConsumption: 0.1,
+                airConsumption: 0.0,
+                exerciseSpace: 0.0,
+                privacyLevel: 0.3,
+                socialSpace: 0.2,
+                storageCapacity: 0.4,
+                maintenanceAccess: 0.9,
+                resourceEfficiency: 0.9,
+                energyEfficiency: 0.8,
+                powerGeneration: 0.0,
+                exerciseEquipment: 0.0,
+                // Parámetros expandidos para ECLSS
+                nutritionQuality: 0.9,
+                exerciseRegularity: 0.0,
+                sleepQuality: 0.8,
+                circadianRhythms: 0.7,
+                privateSpaces: 0.3,
+                socialConnection: 0.2,
+                sensoryStimulation: 0.4,
+                purposeMotivation: 0.6,
+                earthCommunication: 0.5,
+                aestheticEnvironment: 0.4,
+                naturalLighting: 0.6,
+                ambientSound: 0.5,
+                leisureTime: 0.3,
+                environmentFlexibility: 0.5,
+                systemReliability: 0.95,
+                personalAutonomy: 0.6,
+                psychologicalSupport: 0.4,
+                identityBelonging: 0.5,
+                dockingPorts: 3,
+                maxConnections: 6,
+                color: [0.0, 0.8, 0.4]
+            },
+            power: {
+                name: 'Power',
+                description: 'Módulo de energía solar',
+                type: 'power',
+                diameter: 2.0,
+                length: 3.0,
+                mass: 5000,
+                powerConsumption: -15.0,
+                waterConsumption: 0.0,
+                airConsumption: 0.0,
+                exerciseSpace: 0.0,
+                privacyLevel: 0.1,
+                socialSpace: 0.1,
+                storageCapacity: 0.2,
+                maintenanceAccess: 0.7,
+                resourceEfficiency: 0.8,
+                energyEfficiency: 0.9,
+                powerGeneration: 1.0,
+                exerciseEquipment: 0.0,
+                // Parámetros expandidos para Power
+                nutritionQuality: 0.0,
+                exerciseRegularity: 0.0,
+                sleepQuality: 0.0,
+                circadianRhythms: 0.0,
+                privateSpaces: 0.1,
+                socialConnection: 0.1,
+                sensoryStimulation: 0.2,
+                purposeMotivation: 0.7,
+                earthCommunication: 0.8,
+                aestheticEnvironment: 0.3,
+                naturalLighting: 0.9,
+                ambientSound: 0.2,
+                leisureTime: 0.0,
+                environmentFlexibility: 0.3,
+                systemReliability: 0.9,
+                personalAutonomy: 0.4,
+                psychologicalSupport: 0.2,
+                identityBelonging: 0.3,
+                dockingPorts: 2,
+                maxConnections: 4,
+                color: [1.0, 0.8, 0.0]
+            },
+            lab: {
+                name: 'Laboratorio',
+                description: 'Módulo de investigación científica',
+                type: 'research',
+                diameter: 3.5,
+                length: 6.0,
+                mass: 12000,
+                powerConsumption: 12.0,
+                waterConsumption: 1.0,
+                airConsumption: 2.0,
+                exerciseSpace: 0.2,
+                privacyLevel: 0.8,
+                socialSpace: 0.6,
+                storageCapacity: 0.9,
+                maintenanceAccess: 0.8,
+                resourceEfficiency: 0.6,
+                energyEfficiency: 0.5,
+                powerGeneration: 0.0,
+                exerciseEquipment: 0.2,
+                // Parámetros expandidos para Laboratorio
+                nutritionQuality: 0.6,
+                exerciseRegularity: 0.3,
+                sleepQuality: 0.7,
+                circadianRhythms: 0.6,
+                privateSpaces: 0.8,
+                socialConnection: 0.6,
+                sensoryStimulation: 0.8,
+                purposeMotivation: 0.95,
+                earthCommunication: 0.9,
+                aestheticEnvironment: 0.6,
+                naturalLighting: 0.7,
+                ambientSound: 0.5,
+                leisureTime: 0.4,
+                environmentFlexibility: 0.7,
+                systemReliability: 0.85,
+                personalAutonomy: 0.9,
+                psychologicalSupport: 0.8,
+                identityBelonging: 0.9,
+                dockingPorts: 4,
+                maxConnections: 8,
+                color: [0.8, 0.2, 0.8]
+            },
+            docking: {
+                name: 'Docking',
+                description: 'Módulo de acoplamiento',
+                type: 'docking',
+                diameter: 4.0,
+                length: 2.0,
+                mass: 6000,
+                powerConsumption: 2.0,
+                waterConsumption: 0.0,
+                airConsumption: 0.0,
+                exerciseSpace: 0.0,
+                privacyLevel: 0.0,
+                socialSpace: 0.0,
+                storageCapacity: 0.1,
+                maintenanceAccess: 0.9,
+                resourceEfficiency: 0.5,
+                energyEfficiency: 0.7,
+                powerGeneration: 0.0,
+                exerciseEquipment: 0.0,
+                // Parámetros expandidos para Docking
+                nutritionQuality: 0.0,
+                exerciseRegularity: 0.0,
+                sleepQuality: 0.0,
+                circadianRhythms: 0.0,
+                privateSpaces: 0.0,
+                socialConnection: 0.0,
+                sensoryStimulation: 0.1,
+                purposeMotivation: 0.4,
+                earthCommunication: 0.6,
+                aestheticEnvironment: 0.2,
+                naturalLighting: 0.3,
+                ambientSound: 0.1,
+                leisureTime: 0.0,
+                environmentFlexibility: 0.2,
+                systemReliability: 0.95,
+                personalAutonomy: 0.3,
+                psychologicalSupport: 0.1,
+                identityBelonging: 0.2,
+                dockingPorts: 6,
+                maxConnections: 12,
+                color: [0.6, 0.6, 0.6]
+            },
+            exercise: {
+                name: 'Ejercicio',
+                description: 'Módulo de ejercicio y acondicionamiento',
+                type: 'exercise',
+                diameter: 2.5,
+                length: 4.0,
+                mass: 7000,
+                powerConsumption: 3.0,
+                waterConsumption: 0.5,
+                airConsumption: 1.0,
+                exerciseSpace: 1.0,
+                privacyLevel: 0.6,
+                socialSpace: 0.8,
+                storageCapacity: 0.3,
+                maintenanceAccess: 0.7,
+                resourceEfficiency: 0.7,
+                energyEfficiency: 0.6,
+                powerGeneration: 0.0,
+                exerciseEquipment: 1.0,
+                // Parámetros expandidos para Ejercicio
+                nutritionQuality: 0.7,
+                exerciseRegularity: 1.0,
+                sleepQuality: 0.8,
+                circadianRhythms: 0.7,
+                privateSpaces: 0.6,
+                socialConnection: 0.8,
+                sensoryStimulation: 0.9,
+                purposeMotivation: 0.8,
+                earthCommunication: 0.6,
+                aestheticEnvironment: 0.7,
+                naturalLighting: 0.8,
+                ambientSound: 0.8,
+                leisureTime: 0.9,
+                environmentFlexibility: 0.8,
+                systemReliability: 0.8,
+                personalAutonomy: 0.9,
+                psychologicalSupport: 0.8,
+                identityBelonging: 0.8,
+                dockingPorts: 2,
+                maxConnections: 4,
+                color: [0.9, 0.3, 0.3]
+            },
+            storage: {
+                name: 'Almacenamiento',
+                description: 'Módulo de almacenamiento y logística',
+                type: 'storage',
+                diameter: 3.0,
+                length: 5.0,
+                mass: 9000,
+                powerConsumption: 1.0,
+                waterConsumption: 0.0,
+                airConsumption: 0.0,
+                exerciseSpace: 0.0,
+                privacyLevel: 0.2,
+                socialSpace: 0.1,
+                storageCapacity: 1.0,
+                maintenanceAccess: 0.9,
+                resourceEfficiency: 0.9,
+                energyEfficiency: 0.8,
+                powerGeneration: 0.0,
+                exerciseEquipment: 0.0,
+                // Parámetros expandidos para Almacenamiento
+                nutritionQuality: 0.8,
+                exerciseRegularity: 0.0,
+                sleepQuality: 0.0,
+                circadianRhythms: 0.0,
+                privateSpaces: 0.2,
+                socialConnection: 0.1,
+                sensoryStimulation: 0.2,
+                purposeMotivation: 0.5,
+                earthCommunication: 0.4,
+                aestheticEnvironment: 0.3,
+                naturalLighting: 0.4,
+                ambientSound: 0.2,
+                leisureTime: 0.1,
+                environmentFlexibility: 0.4,
+                systemReliability: 0.9,
+                personalAutonomy: 0.6,
+                psychologicalSupport: 0.3,
+                identityBelonging: 0.4,
+                dockingPorts: 3,
+                maxConnections: 6,
+                color: [0.5, 0.5, 0.5]
+            }
+        };
+
+        // Parámetros de evaluación por hábitat expandidos
+        const habitatParameters = {
+            leo: {
+                radiationLevel: 0.3,
+                gravityLevel: 0.0,
+                temperatureRange: 0.8,
+                atmosphericPressure: 0.0,
+                dustLevel: 0.1,
+                communicationDelay: 0.0,
+                resupplyFrequency: 0.9,
+                emergencyEvacuation: 0.9,
+                // Parámetros expandidos para LEO
+                earthCommunication: 0.95,
+                naturalLighting: 0.9,
+                ambientSound: 0.7,
+                leisureTime: 0.8,
+                environmentFlexibility: 0.8,
+                systemReliability: 0.9,
+                personalAutonomy: 0.8,
+                psychologicalSupport: 0.9,
+                identityBelonging: 0.8,
+                aestheticEnvironment: 0.7,
+                sensoryStimulation: 0.8,
+                purposeMotivation: 0.8,
+                socialConnection: 0.8,
+                privateSpaces: 0.7,
+                sleepQuality: 0.8,
+                circadianRhythms: 0.8,
+                nutritionQuality: 0.8,
+                exerciseRegularity: 0.7
+            },
+            luna: {
+                radiationLevel: 0.7,
+                gravityLevel: 0.16,
+                temperatureRange: 0.4,
+                atmosphericPressure: 0.0,
+                dustLevel: 0.9,
+                communicationDelay: 0.1,
+                resupplyFrequency: 0.6,
+                emergencyEvacuation: 0.4,
+                // Parámetros expandidos para Luna
+                earthCommunication: 0.7,
+                naturalLighting: 0.6,
+                ambientSound: 0.4,
+                leisureTime: 0.6,
+                environmentFlexibility: 0.6,
+                systemReliability: 0.8,
+                personalAutonomy: 0.7,
+                psychologicalSupport: 0.6,
+                identityBelonging: 0.7,
+                aestheticEnvironment: 0.5,
+                sensoryStimulation: 0.5,
+                purposeMotivation: 0.9,
+                socialConnection: 0.6,
+                privateSpaces: 0.6,
+                sleepQuality: 0.6,
+                circadianRhythms: 0.5,
+                nutritionQuality: 0.7,
+                exerciseRegularity: 0.8
+            },
+            marte: {
+                radiationLevel: 0.5,
+                gravityLevel: 0.38,
+                temperatureRange: 0.3,
+                atmosphericPressure: 0.01,
+                dustLevel: 0.8,
+                communicationDelay: 0.8,
+                resupplyFrequency: 0.2,
+                emergencyEvacuation: 0.1,
+                // Parámetros expandidos para Marte
+                earthCommunication: 0.3,
+                naturalLighting: 0.4,
+                ambientSound: 0.3,
+                leisureTime: 0.4,
+                environmentFlexibility: 0.4,
+                systemReliability: 0.7,
+                personalAutonomy: 0.9,
+                psychologicalSupport: 0.4,
+                identityBelonging: 0.9,
+                aestheticEnvironment: 0.4,
+                sensoryStimulation: 0.4,
+                purposeMotivation: 0.95,
+                socialConnection: 0.5,
+                privateSpaces: 0.5,
+                sleepQuality: 0.5,
+                circadianRhythms: 0.4,
+                nutritionQuality: 0.6,
+                exerciseRegularity: 0.9
+            }
+        };
+
+        // Áreas de evaluación expandidas y mejoradas
+        const evaluationAreas = {
+            physicalHealth: {
+                name: 'Salud Física',
+                weight: 0.18,
+                factors: [
+                    'nutritionQuality', 'exerciseRegularity', 'sleepQuality', 'circadianRhythms',
+                    'airConsumption', 'waterConsumption', 'exerciseSpace', 'maintenanceAccess'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            mentalHealth: {
+                name: 'Salud Mental',
+                weight: 0.16,
+                factors: [
+                    'privateSpaces', 'socialConnection', 'sensoryStimulation', 'purposeMotivation',
+                    'earthCommunication', 'psychologicalSupport', 'identityBelonging'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            environmentalComfort: {
+                name: 'Confort Ambiental',
+                weight: 0.14,
+                factors: [
+                    'aestheticEnvironment', 'naturalLighting', 'ambientSound', 'leisureTime',
+                    'environmentFlexibility', 'temperatureRange', 'atmosphericPressure'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            safetyReliability: {
+                name: 'Seguridad y Confiabilidad',
+                weight: 0.12,
+                factors: [
+                    'systemReliability', 'personalAutonomy', 'emergencyEvacuation',
+                    'radiationLevel', 'dustLevel', 'maintenanceAccess'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            resourceManagement: {
+                name: 'Gestión de Recursos',
+                weight: 0.12,
+                factors: [
+                    'storageCapacity', 'resupplyFrequency', 'resourceEfficiency',
+                    'waterConsumption', 'airConsumption'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            energyEfficiency: {
+                name: 'Ahorro Energético',
+                weight: 0.10,
+                factors: [
+                    'powerConsumption', 'energyEfficiency', 'powerGeneration',
+                    'naturalLighting', 'ambientSound'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            exerciseWellness: {
+                name: 'Ejercicio y Bienestar',
+                weight: 0.10,
+                factors: [
+                    'exerciseSpace', 'exerciseEquipment', 'exerciseRegularity',
+                    'gravityLevel', 'leisureTime'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            },
+            socialPsychological: {
+                name: 'Aspectos Sociales y Psicológicos',
+                weight: 0.08,
+                factors: [
+                    'socialSpace', 'socialConnection', 'privateSpaces', 'earthCommunication',
+                    'psychologicalSupport', 'identityBelonging', 'purposeMotivation'
+                ],
+                thresholds: { excellent: 0.85, good: 0.70, fair: 0.55, poor: 0.40 }
+            }
+        };
+
+        function log(message, type = 'info') {
+            // Solo log en consola para producción
+            console.log(message);
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('renderStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function updateModuleInfo() {
+            const infoDiv = document.getElementById('moduleInfo');
+            if (selectedModuleIndex !== -1 && selectedModuleIndex < modules.length) {
+                const module = modules[selectedModuleIndex];
+                const data = module.data;
+                infoDiv.innerHTML = `
+                    <h4>${data.name}</h4>
+                    <p><strong>Descripción:</strong> ${data.description}</p>
+                    <p><strong>Tipo:</strong> ${data.type}</p>
+                    <p><strong>Dimensiones:</strong> ${data.diameter}m × ${data.length}m</p>
+                    <p><strong>Masa:</strong> ${data.mass} kg</p>
+                    <hr>
+                    <h5>⚡ Energía</h5>
+                    <p><strong>Consumo:</strong> ${data.powerConsumption} kW</p>
+                    <p><strong>Generación:</strong> ${data.powerGeneration > 0 ? data.powerGeneration : 'No genera'} kW</p>
+                    <p><strong>Eficiencia:</strong> ${Math.round(data.energyEfficiency * 100)}%</p>
+                    <hr>
+                    <h5>💧 Recursos</h5>
+                    <p><strong>Agua:</strong> ${data.waterConsumption} L/h</p>
+                    <p><strong>Aire:</strong> ${data.airConsumption} m³/h</p>
+                    <p><strong>Eficiencia:</strong> ${Math.round(data.resourceEfficiency * 100)}%</p>
+                    <p><strong>Almacenamiento:</strong> ${Math.round(data.storageCapacity * 100)}%</p>
+                    <hr>
+                    <h5>🏥 Salud Física</h5>
+                    <p><strong>Nutrición:</strong> ${Math.round(data.nutritionQuality * 100)}%</p>
+                    <p><strong>Ejercicio regular:</strong> ${Math.round(data.exerciseRegularity * 100)}%</p>
+                    <p><strong>Calidad del sueño:</strong> ${Math.round(data.sleepQuality * 100)}%</p>
+                    <p><strong>Ritmos circadianos:</strong> ${Math.round(data.circadianRhythms * 100)}%</p>
+                    <hr>
+                    <h5>🧠 Salud Mental</h5>
+                    <p><strong>Espacios privados:</strong> ${Math.round(data.privateSpaces * 100)}%</p>
+                    <p><strong>Conexión social:</strong> ${Math.round(data.socialConnection * 100)}%</p>
+                    <p><strong>Estímulo sensorial:</strong> ${Math.round(data.sensoryStimulation * 100)}%</p>
+                    <p><strong>Propósito y motivación:</strong> ${Math.round(data.purposeMotivation * 100)}%</p>
+                    <p><strong>Comunicación Tierra:</strong> ${Math.round(data.earthCommunication * 100)}%</p>
+                    <p><strong>Apoyo psicológico:</strong> ${Math.round(data.psychologicalSupport * 100)}%</p>
+                    <p><strong>Identidad y pertenencia:</strong> ${Math.round(data.identityBelonging * 100)}%</p>
+                    <hr>
+                    <h5>🌍 Confort Ambiental</h5>
+                    <p><strong>Entorno estético:</strong> ${Math.round(data.aestheticEnvironment * 100)}%</p>
+                    <p><strong>Iluminación natural:</strong> ${Math.round(data.naturalLighting * 100)}%</p>
+                    <p><strong>Sonido ambiental:</strong> ${Math.round(data.ambientSound * 100)}%</p>
+                    <p><strong>Tiempo de ocio:</strong> ${Math.round(data.leisureTime * 100)}%</p>
+                    <p><strong>Flexibilidad:</strong> ${Math.round(data.environmentFlexibility * 100)}%</p>
+                    <hr>
+                    <h5>🛡️ Seguridad</h5>
+                    <p><strong>Confiabilidad:</strong> ${Math.round(data.systemReliability * 100)}%</p>
+                    <p><strong>Autonomía:</strong> ${Math.round(data.personalAutonomy * 100)}%</p>
+                    <p><strong>Mantenimiento:</strong> ${Math.round(data.maintenanceAccess * 100)}%</p>
+                    <hr>
+                    <h5>🔧 Conexiones</h5>
+                    <p><strong>Puertos:</strong> ${data.dockingPorts}</p>
+                    <p><strong>Conexiones máx:</strong> ${data.maxConnections}</p>
+                `;
+            } else {
+                infoDiv.innerHTML = `
+                    <h4>Ningún módulo seleccionado</h4>
+                    <p>Selecciona un módulo para ver información detallada</p>
+                `;
+            }
+        }
+
+        function evaluateModule(module) {
+            const data = module.data;
+            const habitat = habitatParameters[currentHabitat];
+            const scores = {};
+
+            // Calcular puntuación para cada área con algoritmo mejorado
+            Object.keys(evaluationAreas).forEach(areaKey => {
+                const area = evaluationAreas[areaKey];
+                let areaScore = 0;
+                let factorCount = 0;
+                let weightedSum = 0;
+                let totalWeight = 0;
+
+                area.factors.forEach(factor => {
+                    let factorValue = 0;
+                    let factorWeight = 1.0; // Peso por defecto
+
+                    // Obtener valor del módulo o hábitat
+                    if (data[factor] !== undefined) {
+                        factorValue = data[factor];
+                    } else if (habitat[factor] !== undefined) {
+                        factorValue = habitat[factor];
+                    }
+
+                    // Ajustar pesos según el factor
+                    switch (factor) {
+                        case 'powerConsumption':
+                            // Para consumo de energía, valores negativos son buenos (generación)
+                            factorWeight = 1.5;
+                            if (factorValue < 0) {
+                                factorValue = Math.abs(factorValue) / 20; // Normalizar generación
+                            } else {
+                                factorValue = Math.max(0, 1 - factorValue / 20); // Invertir consumo
+                            }
+                            break;
+                        case 'powerGeneration':
+                            factorWeight = 1.3;
+                            break;
+                        case 'energyEfficiency':
+                            factorWeight = 1.2;
+                            break;
+                        case 'resourceEfficiency':
+                            factorWeight = 1.2;
+                            break;
+                        case 'storageCapacity':
+                            factorWeight = 1.1;
+                            break;
+                        case 'exerciseSpace':
+                            factorWeight = 1.1;
+                            break;
+                        case 'privacyLevel':
+                            factorWeight = 1.0;
+                            break;
+                        case 'socialSpace':
+                            factorWeight = 1.0;
+                            break;
+                        case 'maintenanceAccess':
+                            factorWeight = 1.1;
+                            break;
+                        case 'radiationLevel':
+                            factorWeight = 1.4;
+                            factorValue = 1 - factorValue; // Invertir (menos radiación = mejor)
+                            break;
+                        case 'dustLevel':
+                            factorWeight = 1.3;
+                            factorValue = 1 - factorValue; // Invertir (menos polvo = mejor)
+                            break;
+                        case 'communicationDelay':
+                            factorWeight = 1.2;
+                            factorValue = 1 - factorValue; // Invertir (menos retraso = mejor)
+                            break;
+                        case 'resupplyFrequency':
+                            factorWeight = 1.1;
+                            break;
+                        case 'emergencyEvacuation':
+                            factorWeight = 1.3;
+                            break;
+                        case 'temperatureRange':
+                            factorWeight = 1.0;
+                            break;
+                        case 'atmosphericPressure':
+                            factorWeight = 1.0;
+                            break;
+                        case 'gravityLevel':
+                            factorWeight = 1.0;
+                            break;
+                        case 'exerciseEquipment':
+                            factorWeight = 1.1;
+                            break;
+                    }
+
+                    // Aplicar factor de tripulación para algunos parámetros
+                    if (['airConsumption', 'waterConsumption', 'exerciseSpace', 'socialSpace'].includes(factor)) {
+                        factorValue = factorValue * Math.min(1.0, crewCount / 4); // Normalizar por tripulación
+                    }
+
+                    // Aplicar factor de hábitat para algunos parámetros
+                    if (['powerConsumption', 'energyEfficiency'].includes(factor)) {
+                        if (currentHabitat === 'marte') {
+                            factorValue *= 0.8; // Marte requiere más energía
+                        } else if (currentHabitat === 'luna') {
+                            factorValue *= 0.9; // Luna requiere algo más de energía
+                        }
+                    }
+
+                    weightedSum += factorValue * factorWeight;
+                    totalWeight += factorWeight;
+                    factorCount++;
+                });
+
+                // Calcular puntuación ponderada
+                if (totalWeight > 0) {
+                    areaScore = weightedSum / totalWeight;
+                } else {
+                    areaScore = 0;
+                }
+
+                // Aplicar umbrales de calidad
+                const thresholds = area.thresholds;
+                if (areaScore >= thresholds.excellent) {
+                    areaScore = Math.min(1.0, areaScore * 1.05); // Bonus por excelencia
+                } else if (areaScore >= thresholds.good) {
+                    areaScore = areaScore; // Sin modificación
+                } else if (areaScore >= thresholds.fair) {
+                    areaScore = areaScore * 0.95; // Penalización menor
+                } else {
+                    areaScore = areaScore * 0.85; // Penalización mayor
+                }
+
+                scores[areaKey] = Math.max(0, Math.min(1.0, areaScore));
+            });
+
+            return scores;
+        }
+
+        function calculateSystemEfficiency() {
+            if (modules.length === 0) return { efficiency: 0, balance: 0 };
+
+            let totalPowerConsumption = 0;
+            let totalPowerGeneration = 0;
+            let totalStorageCapacity = 0;
+            let totalResourceEfficiency = 0;
+            let moduleCount = modules.length;
+
+            modules.forEach(module => {
+                const data = module.data;
+                totalPowerConsumption += Math.max(0, data.powerConsumption);
+                totalPowerGeneration += Math.max(0, -data.powerConsumption);
+                totalStorageCapacity += data.storageCapacity;
+                totalResourceEfficiency += data.resourceEfficiency;
+            });
+
+            // Calcular eficiencia del sistema
+            const powerBalance = totalPowerGeneration - totalPowerConsumption;
+            const powerEfficiency = totalPowerGeneration > 0 ? 
+                Math.min(1.0, powerBalance / totalPowerGeneration) : 0;
+
+            const storageEfficiency = totalStorageCapacity / moduleCount;
+            const resourceEfficiency = totalResourceEfficiency / moduleCount;
+
+            const systemEfficiency = (powerEfficiency * 0.4 + storageEfficiency * 0.3 + resourceEfficiency * 0.3);
+
+            return {
+                efficiency: systemEfficiency,
+                balance: powerBalance,
+                powerGeneration: totalPowerGeneration,
+                powerConsumption: totalPowerConsumption
+            };
+        }
+
+        function updateEvaluation() {
+            if (modules.length === 0) {
+                document.getElementById('overallScore').innerHTML = `
+                    <span>Puntuación Total:</span>
+                    <span class="score-value">0%</span>
+                `;
+                document.getElementById('areaScores').innerHTML = '<p>No hay módulos para evaluar</p>';
+                return;
+            }
+
+            // Calcular eficiencia del sistema
+            const systemEfficiency = calculateSystemEfficiency();
+
+            // Calcular puntuación general
+            let totalScore = 0;
+            let totalWeight = 0;
+            const allScores = {};
+
+            // Inicializar scores
+            Object.keys(evaluationAreas).forEach(areaKey => {
+                allScores[areaKey] = 0;
+            });
+
+            // Evaluar cada módulo
+            modules.forEach(module => {
+                const scores = evaluateModule(module);
+                Object.keys(scores).forEach(areaKey => {
+                    allScores[areaKey] += scores[areaKey];
+                });
+            });
+
+            // Promediar scores y aplicar eficiencia del sistema
+            Object.keys(allScores).forEach(areaKey => {
+                allScores[areaKey] /= modules.length;
+                
+                // Aplicar factor de eficiencia del sistema para áreas relacionadas
+                if (['resourceManagement', 'energyEfficiency'].includes(areaKey)) {
+                    allScores[areaKey] = (allScores[areaKey] * 0.7) + (systemEfficiency.efficiency * 0.3);
+                }
+                
+                totalScore += allScores[areaKey] * evaluationAreas[areaKey].weight;
+                totalWeight += evaluationAreas[areaKey].weight;
+            });
+
+            const overallScore = totalWeight > 0 ? totalScore / totalWeight : 0;
+            const overallPercentage = Math.round(overallScore * 100);
+
+            // Actualizar puntuación general
+            const overallScoreDiv = document.getElementById('overallScore');
+            overallScoreDiv.innerHTML = `
+                <span>Puntuación Total:</span>
+                <span class="score-value">${overallPercentage}%</span>
+            `;
+            overallScoreDiv.className = `score ${overallPercentage >= 80 ? 'green' : overallPercentage >= 60 ? 'amber' : 'red'}`;
+
+            // Actualizar scores por área
+            const areaScoresDiv = document.getElementById('areaScores');
+            areaScoresDiv.innerHTML = '';
+            
+            Object.keys(evaluationAreas).forEach(areaKey => {
+                const area = evaluationAreas[areaKey];
+                const score = allScores[areaKey];
+                const percentage = Math.round(score * 100);
+                
+                const scoreDiv = document.createElement('div');
+                scoreDiv.className = `score ${percentage >= 80 ? 'green' : percentage >= 60 ? 'amber' : 'red'}`;
+                scoreDiv.innerHTML = `
+                    <span>${area.name}:</span>
+                    <span class="score-value">${percentage}%</span>
+                `;
+                areaScoresDiv.appendChild(scoreDiv);
+            });
+
+            // Añadir información del sistema
+            const systemInfoDiv = document.createElement('div');
+            systemInfoDiv.className = 'evaluation';
+            systemInfoDiv.innerHTML = `
+                <h4>📊 Eficiencia del Sistema</h4>
+                <div class="score ${systemEfficiency.efficiency >= 0.8 ? 'green' : systemEfficiency.efficiency >= 0.6 ? 'amber' : 'red'}">
+                    <span>Eficiencia General:</span>
+                    <span class="score-value">${Math.round(systemEfficiency.efficiency * 100)}%</span>
+                </div>
+                <div class="score">
+                    <span>Balance Energético:</span>
+                    <span class="score-value">${systemEfficiency.balance > 0 ? '+' : ''}${systemEfficiency.balance.toFixed(1)} kW</span>
+                </div>
+                <div class="score">
+                    <span>Generación Total:</span>
+                    <span class="score-value">${systemEfficiency.powerGeneration.toFixed(1)} kW</span>
+                </div>
+                <div class="score">
+                    <span>Consumo Total:</span>
+                    <span class="score-value">${systemEfficiency.powerConsumption.toFixed(1)} kW</span>
+                </div>
+            `;
+            areaScoresDiv.appendChild(systemInfoDiv);
+        }
+
+        function initWebGL() {
+            if (gl) return true;
+            
+            const canvas = document.getElementById('renderCanvas');
+            gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            
+            if (!gl) {
+                log('❌ WebGL no soportado', 'error');
+                updateStatus('❌ WebGL no soportado', 'error');
+                return false;
+            }
+
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(gl.BACK);
+            gl.clearColor(0.05, 0.1, 0.2, 1.0);
+
+            const vertexShaderSource = `
+                attribute vec3 position;
+                attribute vec3 normal;
+                attribute vec3 color;
+                uniform mat4 modelViewMatrix;
+                uniform mat4 projectionMatrix;
+                uniform mat4 transformMatrix;
+                uniform vec3 lightDirection;
+                uniform bool lightingEnabled;
+                varying vec3 vColor;
+                varying vec3 vNormal;
+                varying vec3 vLightDirection;
+                
+                void main() {
+                    gl_Position = projectionMatrix * modelViewMatrix * transformMatrix * vec4(position, 1.0);
+                    vColor = color;
+                    vNormal = normal;
+                    vLightDirection = lightDirection;
+                }
+            `;
+
+            const fragmentShaderSource = `
+                precision mediump float;
+                varying vec3 vColor;
+                varying vec3 vNormal;
+                varying vec3 vLightDirection;
+                uniform bool lightingEnabled;
+                
+                void main() {
+                    vec3 color = vColor;
+                    
+                    if (lightingEnabled) {
+                        vec3 normal = normalize(vNormal);
+                        vec3 lightDir = normalize(vLightDirection);
+                        float diff = max(dot(normal, lightDir), 0.0);
+                        color = vColor * (0.3 + 0.7 * diff);
+                    }
+                    
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `;
+
+            const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertexShader, vertexShaderSource);
+            gl.compileShader(vertexShader);
+
+            if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                log(`❌ Error vertex shader: ${gl.getShaderInfoLog(vertexShader)}`, 'error');
+                return false;
+            }
+
+            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragmentShader, fragmentShaderSource);
+            gl.compileShader(fragmentShader);
+
+            if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                log(`❌ Error fragment shader: ${gl.getShaderInfoLog(fragmentShader)}`, 'error');
+                return false;
+            }
+
+            program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                log(`❌ Error programa: ${gl.getProgramInfoLog(program)}`, 'error');
+                return false;
+            }
+
+            gl.useProgram(program);
+            log('✅ WebGL inicializado correctamente', 'success');
+            return true;
+        }
+
+        function createComplexCylinderGeometry(radius, height, segments = 32) {
+            const vertices = [];
+            const normals = [];
+            const colors = [];
+            const indices = [];
+
+            // Crear vértices del cilindro con más detalle
+            for (let i = 0; i <= segments; i++) {
+                const angle = (i / segments) * Math.PI * 2;
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+
+                // Vértices inferiores
+                vertices.push(x, -height/2, z);
+                normals.push(x, 0, z);
+                colors.push(0.7, 0.7, 0.8);
+
+                // Vértices superiores
+                vertices.push(x, height/2, z);
+                normals.push(x, 0, z);
+                colors.push(0.8, 0.8, 0.9);
+            }
+
+            // Crear caras laterales
+            for (let i = 0; i < segments; i++) {
+                const i1 = i * 2;
+                const i2 = i1 + 1;
+                const i3 = ((i + 1) % segments) * 2;
+                const i4 = i3 + 1;
+
+                indices.push(i1, i2, i3);
+                indices.push(i2, i4, i3);
+                indices.push(i3, i4, i1);
+                indices.push(i4, i2, i1);
+            }
+
+            // Crear tapas superior e inferior
+            const centerBottom = vertices.length / 3;
+            const centerTop = centerBottom + 1;
+            
+            vertices.push(0, -height/2, 0);
+            normals.push(0, -1, 0);
+            colors.push(0.6, 0.6, 0.7);
+            
+            vertices.push(0, height/2, 0);
+            normals.push(0, 1, 0);
+            colors.push(0.7, 0.7, 0.8);
+
+            for (let i = 0; i < segments; i++) {
+                const i1 = i * 2;
+                const i2 = ((i + 1) % segments) * 2;
+                
+                indices.push(centerBottom, i1, i2);
+                indices.push(centerTop, i2 + 1, i1 + 1);
+            }
+
+            return { vertices, normals, colors, indices };
+        }
+
+        function createComplexBoxGeometry(width, height, depth) {
+            const vertices = [];
+            const normals = [];
+            const colors = [];
+            const indices = [];
+
+            const w = width / 2;
+            const h = height / 2;
+            const d = depth / 2;
+
+            const faces = [
+                { vertices: [-w, -h, d, w, -h, d, w, h, d, -w, h, d], normal: [0, 0, 1], color: [0.7, 0.7, 0.8] },
+                { vertices: [w, -h, -d, -w, -h, -d, -w, h, -d, w, h, -d], normal: [0, 0, -1], color: [0.6, 0.6, 0.7] },
+                { vertices: [-w, h, d, w, h, d, w, h, -d, -w, h, -d], normal: [0, 1, 0], color: [0.8, 0.8, 0.9] },
+                { vertices: [-w, -h, -d, w, -h, -d, w, -h, d, -w, -h, d], normal: [0, -1, 0], color: [0.5, 0.5, 0.6] },
+                { vertices: [w, -h, d, w, -h, -d, w, h, -d, w, h, d], normal: [1, 0, 0], color: [0.7, 0.7, 0.8] },
+                { vertices: [-w, -h, -d, -w, -h, d, -w, h, d, -w, h, -d], normal: [-1, 0, 0], color: [0.6, 0.6, 0.7] }
+            ];
+
+            let vertexIndex = 0;
+            faces.forEach(face => {
+                vertices.push(...face.vertices);
+                for (let i = 0; i < 4; i++) {
+                    normals.push(...face.normal);
+                    colors.push(...face.color);
+                }
+                indices.push(vertexIndex, vertexIndex + 1, vertexIndex + 2);
+                indices.push(vertexIndex, vertexIndex + 2, vertexIndex + 3);
+                vertexIndex += 4;
+            });
+
+            return { vertices, normals, colors, indices };
+        }
+
+        function createComplexDockingGeometry(radius, depth) {
+            const vertices = [];
+            const normals = [];
+            const colors = [];
+            const indices = [];
+
+            const segments = 24;
+            
+            for (let i = 0; i <= segments; i++) {
+                const angle = (i / segments) * Math.PI * 2;
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+
+                vertices.push(x, -depth/2, z);
+                normals.push(x, 0, z);
+                colors.push(0.9, 0.9, 0.1);
+
+                vertices.push(x, depth/2, z);
+                normals.push(x, 0, z);
+                colors.push(1.0, 1.0, 0.2);
+            }
+
+            for (let i = 0; i < segments; i++) {
+                const i1 = i * 2;
+                const i2 = i1 + 1;
+                const i3 = ((i + 1) % segments) * 2;
+                const i4 = i3 + 1;
+
+                indices.push(i1, i2, i3);
+                indices.push(i2, i4, i3);
+            }
+
+            return { vertices, normals, colors, indices };
+        }
+
+        function createBuffers(geometry) {
+            const vertexBuffer = gl.createBuffer();
+            const normalBuffer = gl.createBuffer();
+            const colorBuffer = gl.createBuffer();
+            const indexBuffer = gl.createBuffer();
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.vertices), gl.STATIC_DRAW);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.normals), gl.STATIC_DRAW);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(geometry.colors), gl.STATIC_DRAW);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(geometry.indices), gl.STATIC_DRAW);
+
+            return {
+                vertex: vertexBuffer,
+                normal: normalBuffer,
+                color: colorBuffer,
+                index: indexBuffer
+            };
+        }
+
+        function addModule(type) {
+            if (!initWebGL()) return;
+
+            const moduleData = moduleDatabase[type];
+            
+            let geometry;
+            if (type === 'halo') {
+                geometry = createComplexCylinderGeometry(moduleData.diameter, moduleData.length);
+            } else if (type === 'docking') {
+                geometry = createComplexDockingGeometry(moduleData.diameter, moduleData.length);
+            } else {
+                geometry = createComplexBoxGeometry(
+                    moduleData.diameter, 
+                    moduleData.length, 
+                    moduleData.diameter
+                );
+            }
+
+            const buffers = createBuffers(geometry);
+
+            const module = {
+                type: type,
+                data: moduleData,
+                geometry: geometry,
+                buffers: buffers,
+                indices: geometry.indices.length,
+                position: [Math.random() * 10 - 5, 0, Math.random() * 10 - 5],
+                rotation: [0, 0, 0],
+                scale: [1, 1, 1],
+                selected: false,
+                originalColors: geometry.colors.slice()
+            };
+
+            modules.push(module);
+            
+            log(`✅ Módulo ${moduleData.name} añadido`, 'success');
+            updateStatus(`Módulo ${moduleData.name} añadido - Usa controles de cámara para navegar`, 'success');
+            updateModuleInfo();
+            updateEvaluation();
+        }
+
+        function setupMatrices() {
+            const canvas = document.getElementById('renderCanvas');
+            const fov = 45 * Math.PI / 180;
+            const aspect = canvas.width / canvas.height;
+            const near = 0.1;
+            const far = 100.0;
+            
+            const projectionMatrix = createPerspectiveMatrix(fov, aspect, near, far);
+            const projectionMatrixLocation = gl.getUniformLocation(program, 'projectionMatrix');
+            gl.uniformMatrix4fv(projectionMatrixLocation, false, projectionMatrix);
+
+            const modelViewMatrix = createCameraMatrix();
+            const modelViewMatrixLocation = gl.getUniformLocation(program, 'modelViewMatrix');
+            gl.uniformMatrix4fv(modelViewMatrixLocation, false, modelViewMatrix);
+
+            const lightDirection = [0.5, 0.5, -1.0];
+            const lightDirectionLocation = gl.getUniformLocation(program, 'lightDirection');
+            gl.uniform3fv(lightDirectionLocation, lightDirection);
+
+            const lightingEnabledLocation = gl.getUniformLocation(program, 'lightingEnabled');
+            gl.uniform1i(lightingEnabledLocation, lightingEnabled);
+        }
+
+        function createPerspectiveMatrix(fov, aspect, near, far) {
+            const f = Math.tan(Math.PI * 0.5 - 0.5 * fov);
+            const rangeInv = 1.0 / (near - far);
+            
+            return [
+                f / aspect, 0, 0, 0,
+                0, f, 0, 0,
+                0, 0, (near + far) * rangeInv, -1,
+                0, 0, near * far * rangeInv * 2, 0
+            ];
+        }
+
+        function createCameraMatrix() {
+            const cosX = Math.cos(camera.rotationX);
+            const sinX = Math.sin(camera.rotationX);
+            const cosY = Math.cos(camera.rotationY);
+            const sinY = Math.sin(camera.rotationY);
+            
+            const rotY = [
+                cosY, 0, sinY, 0,
+                0, 1, 0, 0,
+                -sinY, 0, cosY, 0,
+                0, 0, 0, 1
+            ];
+            
+            const rotX = [
+                1, 0, 0, 0,
+                0, cosX, -sinX, 0,
+                0, sinX, cosX, 0,
+                0, 0, 0, 1
+            ];
+            
+            const pos = [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                camera.position[0], camera.position[1], camera.position[2], 1
+            ];
+            
+            const zoom = [
+                camera.zoom, 0, 0, 0,
+                0, camera.zoom, 0, 0,
+                0, 0, camera.zoom, 0,
+                0, 0, 0, 1
+            ];
+            
+            return multiplyMatrices(multiplyMatrices(multiplyMatrices(zoom, pos), rotX), rotY);
+        }
+
+        function multiplyMatrices(a, b) {
+            const result = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < 4; k++) {
+                        sum += a[i * 4 + k] * b[k * 4 + j];
+                    }
+                    result[i * 4 + j] = sum;
+                }
+            }
+            return result;
+        }
+
+        function createTransformMatrix(module) {
+            const [x, y, z] = module.position;
+            const [sx, sy, sz] = module.scale;
+            
+            return [
+                sx, 0, 0, 0,
+                0, sy, 0, 0,
+                0, 0, sz, 0,
+                x, y, z, 1
+            ];
+        }
+
+        function renderModule(module, index) {
+            const transformMatrix = createTransformMatrix(module);
+            const transformMatrixLocation = gl.getUniformLocation(program, 'transformMatrix');
+            gl.uniformMatrix4fv(transformMatrixLocation, false, transformMatrix);
+            
+            const positionLocation = gl.getAttribLocation(program, 'position');
+            const normalLocation = gl.getAttribLocation(program, 'normal');
+            const colorLocation = gl.getAttribLocation(program, 'color');
+
+            if (module.selected) {
+                module.geometry.colors = module.geometry.colors.map((_, i) => {
+                    return i % 3 === 1 ? 1.0 : 0.3;
+                });
+            } else {
+                module.geometry.colors = module.originalColors.slice();
+            }
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, module.buffers.vertex);
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, module.buffers.normal);
+            gl.enableVertexAttribArray(normalLocation);
+            gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, module.buffers.color);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(module.geometry.colors), gl.STATIC_DRAW);
+            gl.enableVertexAttribArray(colorLocation);
+            gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, module.buffers.index);
+            
+            if (wireframeMode) {
+                gl.drawElements(gl.LINES, module.indices, gl.UNSIGNED_SHORT, 0);
+            } else {
+                gl.drawElements(gl.TRIANGLES, module.indices, gl.UNSIGNED_SHORT, 0);
+            }
+        }
+
+        function render() {
+            if (!gl) return;
+            
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            setupMatrices();
+            
+            modules.forEach((module, index) => renderModule(module, index));
+            
+            requestAnimationFrame(render);
+        }
+
+        function screenToWorld(screenX, screenY) {
+            const canvas = document.getElementById('renderCanvas');
+            const x = (screenX / canvas.width) * 20 - 10;
+            const z = (screenY / canvas.height) * 20 - 10;
+            return [x, 0, z];
+        }
+
+        function getModuleAtPosition(worldPos) {
+            for (let i = 0; i < modules.length; i++) {
+                const module = modules[i];
+                const [mx, my, mz] = module.position;
+                const [sx, sy, sz] = module.scale;
+                
+                if (module.type === 'halo' || module.type === 'docking') {
+                    const distance = Math.sqrt(
+                        Math.pow(worldPos[0] - mx, 2) + 
+                        Math.pow(worldPos[2] - mz, 2)
+                    );
+                    if (distance < (1.5 * sx)) {
+                        return i;
+                    }
+                } else {
+                    if (Math.abs(worldPos[0] - mx) < (1.5 * sx) && 
+                        Math.abs(worldPos[2] - mz) < (1.5 * sz)) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        // Event listeners
+        const canvas = document.getElementById('renderCanvas');
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            mousePos = { x, y };
+            lastMousePos = { x, y };
+            
+            if (e.button === 0) {
+                const worldPos = screenToWorld(x, y);
+                const clickedModule = getModuleAtPosition(worldPos);
+                
+                if (clickedModule !== -1) {
+                    selectedModuleIndex = clickedModule;
+                    modules.forEach(module => module.selected = false);
+                    modules[clickedModule].selected = true;
+                    dragging = true;
+                    
+                    dragOffset = {
+                        x: worldPos[0] - modules[clickedModule].position[0],
+                        y: worldPos[2] - modules[clickedModule].position[2]
+                    };
+                    
+                    log(`🎯 Módulo ${modules[clickedModule].data.name} seleccionado`, 'info');
+                    updateStatus(`Módulo ${modules[clickedModule].data.name} seleccionado - Arrastra para mover`, 'success');
+                    updateModuleInfo();
+                } else {
+                    cameraDragging = true;
+                    log('🎥 Iniciando rotación de cámara', 'info');
+                    updateStatus('Rotando cámara - Arrastra para cambiar perspectiva', 'info');
+                }
+            } else if (e.button === 2) {
+                cameraDragging = true;
+                log('🎥 Iniciando pan de cámara', 'info');
+                updateStatus('Moviendo cámara - Arrastra para cambiar posición', 'info');
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const deltaX = x - lastMousePos.x;
+            const deltaY = y - lastMousePos.y;
+            
+            if (dragging && selectedModuleIndex !== -1) {
+                const worldPos = screenToWorld(x, y);
+                modules[selectedModuleIndex].position[0] = worldPos[0] - dragOffset.x;
+                modules[selectedModuleIndex].position[2] = worldPos[2] - dragOffset.y;
+                updateModuleInfo();
+                updateEvaluation();
+            } else if (cameraDragging) {
+                if (e.buttons === 1) {
+                    camera.rotationY -= deltaX * 0.01 * camera.rotationSpeed;
+                    camera.rotationX -= deltaY * 0.01 * camera.rotationSpeed;
+                    camera.rotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotationX));
+                } else if (e.buttons === 2) {
+                    camera.position[0] += deltaX * 0.01 * camera.panSpeed;
+                    camera.position[1] -= deltaY * 0.01 * camera.panSpeed;
+                }
+            }
+            
+            lastMousePos = { x, y };
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (dragging && selectedModuleIndex !== -1) {
+                log(`✅ Módulo ${modules[selectedModuleIndex].data.name} movido`, 'success');
+            }
+            if (cameraDragging) {
+                log('✅ Movimiento de cámara completado', 'success');
+            }
+            dragging = false;
+            cameraDragging = false;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            camera.zoom *= delta;
+            camera.zoom = Math.max(0.1, Math.min(5.0, camera.zoom));
+            log(`🔍 Zoom: ${camera.zoom.toFixed(2)}x`, 'info');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const moveSpeed = 0.5;
+            const rotSpeed = 0.1;
+            
+            switch (e.key.toLowerCase()) {
+                case 'w':
+                    camera.position[2] += moveSpeed;
+                    break;
+                case 's':
+                    camera.position[2] -= moveSpeed;
+                    break;
+                case 'a':
+                    camera.position[0] -= moveSpeed;
+                    break;
+                case 'd':
+                    camera.position[0] += moveSpeed;
+                    break;
+                case 'q':
+                    camera.rotationY -= rotSpeed;
+                    break;
+                case 'e':
+                    camera.rotationY += rotSpeed;
+                    break;
+                case 'r':
+                    resetCamera();
+                    break;
+                case 'delete':
+                    if (selectedModuleIndex !== -1) {
+                        const module = modules[selectedModuleIndex];
+                        log(`🗑️ Eliminando módulo ${module.data.name}`, 'warning');
+                        
+                        gl.deleteBuffer(module.buffers.vertex);
+                        gl.deleteBuffer(module.buffers.normal);
+                        gl.deleteBuffer(module.buffers.color);
+                        gl.deleteBuffer(module.buffers.index);
+                        
+                        modules.splice(selectedModuleIndex, 1);
+                        selectedModuleIndex = -1;
+                        updateModuleInfo();
+                        updateEvaluation();
+                        updateStatus('Módulo eliminado', 'warning');
+                    }
+                    break;
+            }
+        });
+
+        function resetCamera() {
+            camera = {
+                position: [0, 0, -15],
+                target: [0, 0, 0],
+                up: [0, 1, 0],
+                rotationX: 0,
+                rotationY: 0,
+                zoom: 1.0,
+                rotationSpeed: 1.0,
+                zoomSpeed: 1.0,
+                panSpeed: 1.0
+            };
+            log('🔄 Cámara reseteada', 'info');
+        }
+
+        function clearAll() {
+            modules.forEach(module => {
+                gl.deleteBuffer(module.buffers.vertex);
+                gl.deleteBuffer(module.buffers.normal);
+                gl.deleteBuffer(module.buffers.color);
+                gl.deleteBuffer(module.buffers.index);
+            });
+            
+            modules = [];
+            selectedModuleIndex = -1;
+            log('🧹 Todo limpiado', 'info');
+            updateModuleInfo();
+            updateEvaluation();
+            updateStatus('Todo limpiado', 'info');
+        }
+
+        function toggleWireframe() {
+            wireframeMode = !wireframeMode;
+            log(`🔲 Modo wireframe ${wireframeMode ? 'activado' : 'desactivado'}`, 'info');
+        }
+
+        function toggleLighting() {
+            lightingEnabled = !lightingEnabled;
+            log(`💡 Iluminación ${lightingEnabled ? 'activada' : 'desactivada'}`, 'info');
+        }
+
+
+        // Event listeners para controles
+        document.getElementById('habitatSelect').addEventListener('change', (e) => {
+            currentHabitat = e.target.value;
+            log(`🌍 Hábitat cambiado a: ${e.target.options[e.target.selectedIndex].text}`, 'info');
+            updateEvaluation();
+        });
+
+        document.getElementById('crewCount').addEventListener('input', (e) => {
+            crewCount = parseInt(e.target.value);
+            log(`👥 Tripulación cambiada a: ${crewCount}`, 'info');
+            updateEvaluation();
+        });
+
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        window.addEventListener('load', () => {
+            log('🚀 CoreMod Completo cargado', 'info');
+            if (initWebGL()) {
+                render();
+            }
+        });
+    </script>
+</body>
+</html>

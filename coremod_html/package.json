@@ -1,0 +1,37 @@
+{
+  "name": "coremod",
+  "version": "1.0.0",
+  "description": "Diseñador de hábitats espaciales para misiones de larga duración",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 4343",
+    "dev": "python -m http.server 4343",
+    "build": "echo 'No build step required - static HTML/CSS/JS'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "space",
+    "habitat",
+    "design",
+    "3d",
+    "visualization",
+    "nasa",
+    "space-apps",
+    "webgl",
+    "parametric-design"
+  ],
+  "author": "CoreMod Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/coremod.git"
+  },
+  "homepage": "https://coremod.vercel.app",
+  "engines": {
+    "node": ">=14.0.0",
+    "python": ">=3.7.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
